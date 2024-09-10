@@ -21,7 +21,10 @@ def decode(
 
     lines = io.BytesIO(content).readlines()
     first_line = lines[0].decode("utf-8", errors)
-    second_line = lines[1].decode("utf-8", errors)
+    try:
+        second_line = lines[1].decode("utf-8", errors)
+    except IndexError:
+        second_line = None
 
     typing_import_line = 0
     # A custom encoding is set or none
@@ -32,8 +35,9 @@ def decode(
             lines[0] = cookie_re.sub("# -*- coding: utf-8", first_line).encode("utf-8")
 
         # to account that the shebang might be the first line
-        if "future_typing" in second_line:
-            lines[1] = cookie_re.sub("# -*- coding: utf-8", first_line).encode("utf-8")
+        if second_line:
+            if "future_typing" in second_line:
+                lines[1] = cookie_re.sub("# -*- coding: utf-8", second_line).encode("utf-8")
 
     if sys.version_info < (3, 10):
         lines.insert(
