@@ -28,7 +28,8 @@ def decode(
 
     typing_import_line = 0
     # A custom encoding is set or none
-    if cookie_re.match(first_line) or not first_line.strip("\n"):
+    if cookie_re.match(first_line) or not first_line.strip("\n") or \
+        cookie_re.match(second_line) or not second_line.strip("\n"):
         typing_import_line = 1
         # avoid recursion problems
         if "future_typing" in first_line:
