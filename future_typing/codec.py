@@ -83,9 +83,8 @@ def decode(
             if decoded_line.strip().startswith("from __future__"):
                 future_import_found = True
         else:
-            remaining_lines.append(line)
             break
-        
+
     remaining_lines.extend(lines[len(preserved_lines) :])
 
     if sys.version_info < (3, 10):
