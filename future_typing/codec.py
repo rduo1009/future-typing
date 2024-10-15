@@ -41,8 +41,30 @@ def decode(
                 lines[1] = cookie_re.sub("# -*- coding: utf-8", second_line).encode("utf-8")
 
     if sys.version_info < (3, 10):
-        lines.insert(
-            typing_import_line,
+        preserved_lines = []
+        remaining_lines = []
+        docstring_started = False
+        future_import_found = False
+        
+        for line in lines:
+            decoded_line = line.decode("utf-8", errors)
+            if (decoded_line.startswith("#!") or 
+                cookie_re.match(decoded_line) or 
+                (decoded_line.strip().startswith('"""') and not docstring_started) or
+                (docstring_started and not decoded_line.strip().endswith('"""')) or
+                (decoded_line.strip().startswith("from __future__") and not future_import_found)):
+                preserved_lines.append(line)
+                if decoded_line.strip().startswith('"""'):
+                    docstring_started = not docstring_started
+                if decoded_line.strip().startswith("from __future__"):
+                    future_import_found = True
+            else:
+                remaining_lines.append(line)
+                break
+
+        remaining_lines.extend(lines[len(preserved_lines):])
+        remaining_lines.insert(
+            0,
             f"import typing as {typing_module_name}\n".encode("utf-8"),
         )
 
